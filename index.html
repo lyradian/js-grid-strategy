@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Isometric Grid</title>
+        <script src="js/input.js?v=1"></script>
+        <script src="js/grid.js?v=1"></script>
+        <style>
+            .container {
+                border: 1px solid black;
+                background-color: black;
+                position: relative;
+                width: 100%;
+                height: 100vh;
+                /* Or any height you desire */
+            }
+
+            #grid-canvas {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+        </style>
+    </head>
+    <body class="container">
+        <canvas id="grid-canvas"></canvas>
+        <script>
+            const canvas = document.getElementById('grid-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 1600;
+            canvas.height = 1200;
+            let columns = 16;
+            let rows = 16;
+            const gridInfo = [...Array(rows)].map(() => Array(columns).fill(0));
+            const input = new Input(canvas);
+            const grid = new Grid(gridInfo, canvas);
+            input.SubscribeMove(grid, grid.HighlightCell);
+            grid.Draw(ctx);
+        </script>
+    </body>
+</html>
