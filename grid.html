@@ -1,0 +1,131 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Isometric Grid</title>
+  <style>
+    canvas 
+    {
+      	border: 1px solid black;
+	background-color: black;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="grid-canvas"></canvas>
+  <script>
+    const canvas = document.getElementById('grid-canvas');
+    const ctx = canvas.getContext('2d');
+    const gridInfo = [
+	[0,0,0,0,0,0,0,0],
+	[0,1,0,0,0,0,0,0],
+	[0,0,2,0,0,0,0,0],
+	[0,0,0,3,0,0,0,0],
+	[0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0]
+	];
+
+    const gridRows = gridInfo.length;
+    const gridColumns = gridInfo[0].length; 
+    const cellWidth = 60;
+    const cellHeight = cellWidth / 2;
+    const cellSize = cellWidth;
+    const canvasWidth = gridColumns * cellSize;
+    const canvasHeight = gridRows * cellSize;
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+
+    const leftPadding = 0;
+    const topPadding = canvasHeight/4;
+    const startingX = leftPadding + canvasWidth / 2 - 0.5;
+    const startingY = topPadding - 0.5;	
+
+    function DrawIsometricGrid() 
+    {
+      	ctx.clearRect(0, 0, canvas.width, canvas.height);
+      	for (let col = 0; col < gridColumns; col++) 
+      	{
+      	  	for (let row = 0; row < gridRows; row++) 
+      	  	{
+	        	DrawCell(col, row);
+        	}
+      	}
+    }
+
+    function DrawCell(col, row) 
+    {
+	let x = startingX + col + cellWidth*col/2 - row*cellWidth/2;
+	let y = startingY + row + cellHeight*row/2 + col*cellHeight/2;
+
+	ctx.beginPath();
+	ctx.moveTo(x, y);
+	ctx.lineTo(x + cellWidth/2, y + cellHeight/2); 	//downright
+	ctx.lineTo(x, y + cellHeight); 			//downleft
+	ctx.lineTo(x - cellWidth/2, y + cellHeight/2);	//upleft
+	ctx.closePath();		
+	
+	switch (gridInfo[row][col])
+	{
+		case 1: ctx.fillStyle = 'red'; break;
+		case 2: ctx.fillStyle = 'blue'; break;
+		case 3: ctx.fillStyle = 'white'; break;
+		default: ctx.fillStyle = 'black';
+	}
+	ctx.fill();
+	ctx.strokeStyle = 'white';
+	ctx.stroke();
+    }
+
+    function IsPointInCell(cursorX, cursorY, col, row) 
+    {
+	let cellX = startingX + col + cellWidth*col/2 - row*cellWidth/2;
+	let cellY = startingY + row + cellHeight*row/2 + col*cellHeight/2;
+	const vertices = [
+        	[cellX, cellY],
+	        [cellX + cellWidth / 2, cellY + cellHeight / 2],
+        	[cellX, cellY + cellHeight],
+	        [cellX - cellWidth / 2, cellY + cellHeight / 2]
+    	];
+    	let inside = false;
+    	for (let i = 0, j = vertices.length - 1; i < vertices.length; j = i++) {
+        	const xi = vertices[i][0], yi = vertices[i][1];
+        	const xj = vertices[j][0], yj = vertices[j][1];
+        	const intersect = ((yi > cursorY) !== (yj > cursorY)) && (cursorX < (xj - xi) * (cursorY - yi) / (yj - yi) + xi);
+	        if (intersect) inside = !inside;
+    	}
+	return inside;
+    }	
+
+
+    function GetCellCoordinates(event) 
+    {
+    	const rect = canvas.getBoundingClientRect();
+    	const mouseX = event.clientX - rect.left;
+    	const mouseY = event.clientY - rect.top;
+    
+	let positionFound = false;
+	for (let row=0;row<gridInfo.length;row++) 
+	{
+		for (let col=0; col<gridInfo[0].length;col++) 
+		{
+			if (IsPointInCell(mouseX,mouseY, col,row)) 
+			{
+				gridInfo[row][col] = 2;
+				DrawCell(col,row);
+			}
+
+		}
+	}
+    }
+
+    canvas.addEventListener('mousemove', GetCellCoordinates); 
+
+    DrawIsometricGrid();
+
+  </script>
+</body>
+</html>
