@@ -1,11 +1,11 @@
 class Grid {
-	constructor(gridInfo, canvas) {
+	constructor(canvas, rows, columns) {
 		this.canvas = canvas;
 		this.ctx = canvas.getContext('2d');
-		this.gridInfo = gridInfo;
-		this.rows = gridInfo.length;
-		this.columns = gridInfo[0].length || 0;
-		this.cellWidth = canvas.width / (this.columns + 2);
+		this.columns = columns;
+		this.rows = rows;
+		this.gridInfo = [...Array(rows)].map(() => Array(columns).fill(0));
+		this.cellWidth = canvas.width / (columns + 2);
 		this.cellHeight = this.cellWidth / 2;
 		this.startingX = canvas.width / 2 - 0.5;
 		this.startingY = canvas.height / 2 - canvas.width / 4 - 0.5;
@@ -34,19 +34,12 @@ class Grid {
 		ctx.lineTo(x - cellWidth / 2, y + cellHeight / 2); //upleft to left
 		ctx.closePath(); //close back to top
 
-		switch (this.gridInfo[row][col]) {
-			case 1:
-				ctx.fillStyle = 'red';
-				break;
-			case 2:
-				ctx.fillStyle = 'blue';
-				break;
-			case 3:
-				ctx.fillStyle = 'white';
-				break;
-			default:
-				ctx.fillStyle = 'black';
+		switch ((col+row)%3) { //this.gridInfo[row][col]) {
+			case 1: ctx.fillStyle = 'pink'; break;
+			case 2: ctx.fillStyle = 'green'; break;
+			default: ctx.fillStyle = 'purple';
 		}
+		
 		ctx.fill();
 		ctx.strokeStyle = 'white';
 		ctx.stroke();
@@ -65,10 +58,8 @@ class Grid {
 		];
 		let inside = false;
 		for (let i = 0, j = vertices.length - 1; i < vertices.length; j = i++) {
-			const xi = vertices[i][0],
-				yi = vertices[i][1];
-			const xj = vertices[j][0],
-				yj = vertices[j][1];
+			const xi = vertices[i][0], yi = vertices[i][1];
+			const xj = vertices[j][0], yj = vertices[j][1];
 			const intersect = ((yi > cursorY) !== (yj > cursorY)) && (cursorX < (xj - xi) * (cursorY - yi) / (yj - yi) + xi);
 			if (intersect) inside = !inside;
 		}
