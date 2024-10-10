@@ -1,0 +1,25 @@
+colour | magic | physical
+-------------------------
+red range magic - ** grenadier(foc) - bomb - friendly fire aoe
+red melee physical - ** berserker(str) - axe - buffs as damage received
+green melee magic - ** druid(res) - staff - can change forms (eagle: foc, wolf: str, deer: agi, bear: res, cat: luc)
+green range physical - ** ranger(luc) - bow - set traps (bleed, slow, poison)
+blue range magic - ** tactician (foc) - quill - can move other allies
+blue melee physical - ** fencer(agi) - rapier - can parry melee attacks
+white melee magic - ** monk(res) - talisman - can throw enemies and swap positions
+white range physical - ** raider(agi) - boomerang - can pull enemies and use grapple to traverse
+black range magic - ** witch(luc) - broom - curses enemies whilst flying
+black melee physical - ** slaver(str) - whip - can hold enemies in place
+pink range magic - ** bard(luc) - harp - can move enemies involuntarily
+pink melee physical - ** dancer(agi) - fan - can dodge range attacks
+brown range magic - ** savage(str) - club - can throw allied units or obstacles
+brown melee physical - ** rogue(agi) - dagger - can turn invisible
+gold range magic - ** scholar (foc) - book - can silence magic users
+gold melee physical - ** guardian (res) - shield - can protect against physical
+silver melee magic - ** alchemist(foc) - pouch - can change attribute type
+silver range physical - ** gunner(luc) - pistol - can ricochet
+copper melee magic - ** engineer(res) - hammer - can create walls, cannons, pits
+copper range physical - ** knight(str) - lance - can charge extra square for each point of movement.
+
+foc > agi > str > res > luc > (weakness)
+foc > str > luc > agi > res > (weakness)

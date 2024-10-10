@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Prototype</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #game-container {
+            text-align: center;
+        }
+        canvas {
+            border: 2px solid #333;
+        }
+        #game-info {
+            margin-top: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="chessBoard" width="400" height="400"></canvas>
+        <div id="game-info"></div>
+    </div>
+
+    <script>
+        class ChessGame {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.tileSize = this.canvas.width / 8;
+                this.pieces = this.initializePieces();
+                this.selectedPiece = null;
+                this.currentPlayer = 'white';
+                this.canvas.addEventListener('click', this.handleClick.bind(this));
+                this.render();
+                this.updateGameInfo();
+            }
+
+            initializePieces() {
+                return [
+                    { type: 'rook', color: 'black', x: 0, y: 0 },
+                    { type: 'knight', color: 'black', x: 1, y: 0 },
+                    { type: 'bishop', color: 'black', x: 2, y: 0 },
+                    { type: 'queen', color: 'black', x: 3, y: 0 },
+                    { type: 'king', color: 'black', x: 4, y: 0 },
+                    { type: 'bishop', color: 'black', x: 5, y: 0 },
+                    { type: 'knight', color: 'black', x: 6, y: 0 },
+                    { type: 'rook', color: 'black', x: 7, y: 0 },
+                    ...[...Array(8)].map((_, i) => ({ type: 'pawn', color: 'black', x: i, y: 1 })),
+                    ...[...Array(8)].map((_, i) => ({ type: 'pawn', color: 'white', x: i, y: 6 })),
+                    { type: 'rook', color: 'white', x: 0, y: 7 },
+                    { type: 'knight', color: 'white', x: 1, y: 7 },
+                    { type: 'bishop', color: 'white', x: 2, y: 7 },
+                    { type: 'queen', color: 'white', x: 3, y: 7 },
+                    { type: 'king', color: 'white', x: 4, y: 7 },
+                    { type: 'bishop', color: 'white', x: 5, y: 7 },
+                    { type: 'knight', color: 'white', x: 6, y: 7 },
+                    { type: 'rook', color: 'white', x: 7, y: 7 },
+                ];
+            }
+
+            handleClick(event) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = Math.floor((event.clientX - rect.left) / this.tileSize);
+                const y = Math.floor((event.clientY - rect.top) / this.tileSize);
+
+                if (this.selectedPiece) {
+                    this.movePiece(x, y);
+                } else {
+                    this.selectPiece(x, y);
+                }
+            }
+
+            selectPiece(x, y) {
+                const piece = this.pieces.find(p => p.x === x && p.y === y && p.color === this.currentPlayer);
+                if (piece) {
+                    this.selectedPiece = piece;
+                    this.render();
+                }
+            }
+
+            movePiece(x, y) {
+                if (this.isValidMove(this.selectedPiece, x, y)) {
+                    const targetPiece = this.pieces.find(p => p.x === x && p.y === y);
+                    if (targetPiece) {
+                        this.pieces = this.pieces.filter(p => p !== targetPiece);
+                    }
+                    this.selectedPiece.x = x;
+                    this.selectedPiece.y = y;
+                    this.selectedPiece = null;
+                    this.currentPlayer = this.currentPlayer === 'white' ? 'black' : 'white';
+                    this.render();
+                    this.updateGameInfo();
+                }
+            }
+
+            isValidMove(piece, x, y) {
+                // This is a simplified version of move validation
+                // In a full chess game, you'd need to implement all the rules for each piece type
+                const dx = Math.abs(x - piece.x);
+                const dy = Math.abs(y - piece.y);
+
+                switch (piece.type) {
+                    case 'pawn':
+                        return dx === 0 && (dy === 1 || (dy === 2 && ((piece.color === 'white' && piece.y === 6) || (piece.color === 'black' && piece.y === 1))));
+                    case 'rook':
+                        return dx === 0 || dy === 0;
+                    case 'knight':
+                        return (dx === 1 && dy === 2) || (dx === 2 && dy === 1);
+                    case 'bishop':
+                        return dx === dy;
+                    case 'queen':
+                        return dx === dy || dx === 0 || dy === 0;
+                    case 'king':
+                        return dx <= 1 && dy <= 1;
+                    default:
+                        return false;
+                }
+            }
+
+            render() {
+                // Draw the board
+                for (let x = 0; x < 8; x++) {
+                    for (let y = 0; y < 8; y++) {
+                        this.ctx.fillStyle = (x + y) % 2 === 0 ? '#f0d9b5' : '#b58863';
+                        this.ctx.fillRect(x * this.tileSize, y * this.tileSize, this.tileSize, this.tileSize);
+                    }
+                }
+
+                // Draw the pieces
+                this.pieces.forEach(piece => {
+                    this.ctx.fillStyle = piece.color;
+                    this.ctx.font = `${this.tileSize * 0.7}px Arial`;
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    const symbol = this.getPieceSymbol(piece.type);
+                    this.ctx.fillText(symbol, (piece.x + 0.5) * this.tileSize, (piece.y + 0.5) * this.tileSize);
+                });
+
+                // Highlight selected piece
+                if (this.selectedPiece) {
+                    this.ctx.strokeStyle = 'yellow';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.strokeRect(
+                        this.selectedPiece.x * this.tileSize,
+                        this.selectedPiece.y * this.tileSize,
+                        this.tileSize,
+                        this.tileSize
+                    );
+                }
+            }
+
+            getPieceSymbol(type) {
+                switch (type) {
+                    case 'king': return '♚';
+                    case 'queen': return '♛';
+                    case 'rook': return '♜';
+                    case 'bishop': return '♝';
+                    case 'knight': return '♞';
+                    case 'pawn': return '♟';
+                    default: return '';
+                }
+            }
+
+            updateGameInfo() {
+                const infoElement = document.getElementById('game-info');
+                infoElement.innerHTML = `Current Player: ${this.currentPlayer}`;
+            }
+        }
+
+        // Initialize the game
+        const game = new ChessGame('chessBoard');
+    </script>
+</body>
+</html>

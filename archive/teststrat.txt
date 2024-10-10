@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tactical Game Prototype</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #game-container {
+            text-align: center;
+        }
+        canvas {
+            border: 2px solid #333;
+            background-color: #fff;
+        }
+        #game-info {
+            margin-top: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        #endTurnBtn {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <div id="game-info"></div>
+        <button id="endTurnBtn">End Turn</button>
+    </div>
+
+    <script>
+        class TacticalGame {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.gridSize = 8;
+                this.cellSize = this.canvas.width / this.gridSize;
+                this.players = [
+                    { id: 1, name: 'Blue', color: '#4169E1' },
+                    { id: 2, name: 'Red', color: '#DC143C' }
+                ];
+                this.currentPlayerIndex = 0;
+                this.units = [
+                    { x: 0, y: 0, playerId: 1 },
+                    { x: 7, y: 7, playerId: 2 }
+                ];
+                this.selectedUnit = null;
+                this.moveRange = 3;
+
+                this.canvas.addEventListener('click', this.handleClick.bind(this));
+                document.getElementById('endTurnBtn').addEventListener('click', this.endTurn.bind(this));
+
+                this.updateGameInfo();
+                this.render();
+            }
+
+            handleClick(event) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = Math.floor((event.clientX - rect.left) / this.cellSize);
+                const y = Math.floor((event.clientY - rect.top) / this.cellSize);
+
+                if (this.selectedUnit) {
+                    this.moveUnit(x, y);
+                } else {
+                    this.selectUnit(x, y);
+                }
+            }
+
+            selectUnit(x, y) {
+                const unit = this.units.find(u => u.x === x && u.y === y && u.playerId === this.currentPlayer().id);
+                if (unit) {
+                    this.selectedUnit = unit;
+                    this.updateGameInfo();
+                    this.render();
+                }
+            }
+
+            moveUnit(x, y) {
+                if (this.isValidMove(x, y)) {
+                    this.selectedUnit.x = x;
+                    this.selectedUnit.y = y;
+                    this.selectedUnit = null;
+                    this.endTurn();
+                }
+            }
+
+            isValidMove(x, y) {
+                return (
+                    x >= 0 && x < this.gridSize &&
+                    y >= 0 && y < this.gridSize &&
+                    Math.abs(x - this.selectedUnit.x) + Math.abs(y - this.selectedUnit.y) <= this.moveRange &&
+                    !this.units.some(u => u.x === x && u.y === y)
+                );
+            }
+
+            endTurn() {
+                this.selectedUnit = null;
+                this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
+                this.updateGameInfo();
+                this.render();
+            }
+
+            currentPlayer() {
+                return this.players[this.currentPlayerIndex];
+            }
+
+            updateGameInfo() {
+                const infoElement = document.getElementById('game-info');
+                infoElement.innerHTML = `Current Player: ${this.currentPlayer().name}`;
+                if (this.selectedUnit) {
+                    infoElement.innerHTML += ' (Unit selected)';
+                }
+            }
+
+            render() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // Draw grid
+                this.ctx.strokeStyle = '#666';  // Darker grid lines
+                this.ctx.lineWidth = 1;
+                for (let x = 0; x <= this.gridSize; x++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x * this.cellSize, 0);
+                    this.ctx.lineTo(x * this.cellSize, this.canvas.height);
+                    this.ctx.stroke();
+                }
+                for (let y = 0; y <= this.gridSize; y++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, y * this.cellSize);
+                    this.ctx.lineTo(this.canvas.width, y * this.cellSize);
+                    this.ctx.stroke();
+                }
+
+                // Draw move range
+                if (this.selectedUnit) {
+                    this.ctx.fillStyle = 'rgba(144, 238, 144, 0.5)';
+                    for (let x = 0; x < this.gridSize; x++) {
+                        for (let y = 0; y < this.gridSize; y++) {
+                            if (this.isValidMove(x, y)) {
+                                this.ctx.fillRect(x * this.cellSize, y * this.cellSize, this.cellSize, this.cellSize);
+                            }
+                        }
+                    }
+                }
+
+                // Draw units as colored tiles
+                this.units.forEach(unit => {
+                    const player = this.players.find(p => p.id === unit.playerId);
+                    this.ctx.fillStyle = player.color;
+                    this.ctx.fillRect(unit.x * this.cellSize, unit.y * this.cellSize, this.cellSize, this.cellSize);
+                    
+                    // Add a border to the unit tiles
+                    this.ctx.strokeStyle = '#000';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.strokeRect(unit.x * this.cellSize, unit.y * this.cellSize, this.cellSize, this.cellSize);
+                });
+            }
+        }
+
+        // Initialize the game
+        const game = new TacticalGame('gameCanvas');
+    </script>
+</body>
+</html>
