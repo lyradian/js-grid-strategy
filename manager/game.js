@@ -4,29 +4,20 @@ class GameManager {
         this.renderer = renderManager;
         this.gridRows = currentSession.grid.rows;
         this.gridColumns = currentSession.grid.columns;
-        this.renderer.setTileWidth(this.gridColumns);
-        this.renderer.setPromptContainer('game-info');
-
-        this.renderer.canvas.addEventListener('click', this.onGridClick.bind(this));
-        document.getElementById('endTurnBtn').addEventListener('click', this.endTurn.bind(this));
+        this.renderer.setGrid(this.gridColumns, this.gridRows);
+        
+        for ( let i=0;i < this.session.units.length;i++) 
+        {
+            this.renderer.createCanvas(`unit-${i}`, 3);
+        }
+        this.renderer.layers['end'].addEventListener('click', this.endTurn.bind(this));
+        this.renderer.layers['click'].addEventListener('click', this.onGridClick.bind(this));
         this.update();
     }
 
     //----------------------------------------------
-    // Interaction
+    // Actions
     //----------------------------------------------
-    onGridClick(event) {
-        const rect = this.renderer.canvas.getBoundingClientRect();
-        const x = Math.floor((event.clientX - rect.left) / this.renderer.tileWidth);
-        const y = Math.floor((event.clientY - rect.top) / this.renderer.tileWidth);
-
-        if (this.session.selectedUnit) {
-            this.moveUnit(x, y, this.session.selectedUnit);
-        } else {
-            this.selectUnit(x, y);
-        }
-    }
-
     selectUnit(x, y) {
         const findUnit = this.session.units.find(unit => 
                unit.x === x 
@@ -80,14 +71,32 @@ class GameManager {
         }
     }
 
-    //------------------------------------
-    // Render
-    //------------------------------------
+    //----------------------------------------------
+    // Responses
+    //----------------------------------------------
+    onGridClick(event) {
+        const rect = this.renderer.layers['grid'].getBoundingClientRect();
+        const x = Math.floor((event.clientX - rect.left) / this.renderer.grid.tileWidth);
+        const y = Math.floor((event.clientY - rect.top) / this.renderer.grid.tileHeight);
+
+        if (this.session.selectedUnit) {
+            this.moveUnit(x, y, this.session.selectedUnit);
+        } else {
+            this.selectUnit(x, y);
+        }
+    }
+
+    //----------------------------------------------
+    // Interaction
+    //----------------------------------------------
     update() {                
-        this.renderer.clear();
-        this.renderer.renderGrid(this.gridColumns, this.gridRows);
+        this.renderer.clear('highlight');
         this.renderer.renderPrompt(`Current Player: ${this.session.currentPlayer.name} ${(this.session.selectedUnit ? '(Unit selected)' : '')}`);
         if (this.session.selectedUnit) this.highlightMoveRange(this.session.selectedUnit);
-        this.session.units.forEach(this.renderer.renderUnit.bind(this.renderer));
+        for ( let i=0;i < this.session.units.length;i++) 
+        {
+            let unit = this.session.units[i];
+            this.renderer.renderUnit('unit-'+unit.id, unit.x,unit.y,unit.color);    
+        }
     }
 }

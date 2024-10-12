@@ -25,13 +25,10 @@
             background-color: #fff;
         }
         #game-info {
-            margin-top: 10px;
             font-size: 18px;
             font-weight: bold;
         }
         #endTurnBtn {
-            margin-top: 10px;
-            padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
         }
@@ -39,13 +36,12 @@
 </head>
 <body>
     <div id="game-container">
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
-        <div id="game-info"></div>
-        <button id="endTurnBtn">End Turn</button>
     </div>
 
     <script>        
-        const game = new GameManager(new RenderManager('gameCanvas'), new Session());
+        const render = new RenderManager('game-container');
+        const session = new Session();
+        const game = new GameManager(render, session);
     </script>
 </body>
 </html>
