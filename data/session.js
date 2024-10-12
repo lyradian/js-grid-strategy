@@ -6,10 +6,10 @@ class Session {
         ],
         units: [
             { id: '0', x: 0, y: 0, playerId: 1, moveRange: 3, color: '#4169E1'},
-            { id: '1', x: 7, y: 5, playerId: 2, moveRange: 4, color: '#DC143C' }
+            { id: '1', x: 5, y: 5, playerId: 2, moveRange: 4, color: '#DC143C' }
         ],
         grid: {
-            columns: 8,
+            columns: 6,
             rows: 6,
         }
     }) 

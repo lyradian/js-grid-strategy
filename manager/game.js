@@ -2,14 +2,13 @@ class GameManager {
     constructor(renderManager, currentSession) {
         this.session = currentSession;        
         this.renderer = renderManager;
-        this.gridRows = currentSession.grid.rows;
-        this.gridColumns = currentSession.grid.columns;
-        this.renderer.setGrid(this.gridColumns, this.gridRows);
+        this.renderer.setGrid(this.session.grid, 540, 540);
         
         for ( let i=0;i < this.session.units.length;i++) 
         {
             this.renderer.createCanvas(`unit-${i}`, 3);
         }
+
         this.renderer.layers['end'].addEventListener('click', this.endTurn.bind(this));
         this.renderer.layers['click'].addEventListener('click', this.onGridClick.bind(this));
         this.update();
@@ -52,8 +51,8 @@ class GameManager {
     isValidMove(x, y, unit) {
         let allUnits = this.session.units;
         return (
-            x >= 0 && x < this.gridColumns &&
-            y >= 0 && y < this.gridRows &&
+            x >= 0 && x < this.session.grid.columns &&
+            y >= 0 && y < this.session.grid.rows &&
             Math.abs(x - unit.x) + Math.abs(y - unit.y) <= unit.moveRange &&
             !allUnits.some(u => u.x === x && u.y === y)
         );
@@ -61,10 +60,10 @@ class GameManager {
 
     highlightMoveRange(unit) {
         if (unit) {         
-            for (let x = 0; x < this.gridColumns; x++) {
-                for (let y = 0; y < this.gridRows; y++) {
+            for (let x = 0; x < this.session.grid.columns; x++) {
+                for (let y = 0; y < this.session.grid.rows; y++) {
                     if (this.isValidMove(x, y, unit)) {
-                        this.renderer.renderTile(x, y);
+                        this.renderer.renderTile('highlight', x, y);
                     }
                 }
             }
